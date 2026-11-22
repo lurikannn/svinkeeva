@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ева</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+        font-family: 'Comfortaa', cursive;
+        background: #0f0c29;
+        background: linear-gradient(45deg, #0f0c29, #302b63, #24243e);
+        color: #fff;
+        height: 100vh;
+        height: 100dvh; /* Для мобильных браузеров */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        text-align: center;
+        padding: 20px;
+    }
+
+    /* Красивые звезды на фоне */
+    .stars {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+        background-image: radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 2px);
+        background-size: 50px 50px;
+        animation: moveStars 20s linear infinite;
+        opacity: 0.3;
+    }
+    @keyframes moveStars { from { background-position: 0 0; } to { background-position: -100px 100px; } }
+
+    #scene {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 30px;
+        transition: opacity 0.5s ease;
+    }
+
+    #greeting {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(to right, #ff416c, #ff4b2b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: glow 2s infinite alternate;
+    }
+    @keyframes glow { from { filter: drop-shadow(0 0 5px rgba(255,75,43,0.4)); } to { filter: drop-shadow(0 0 20px rgba(255,75,43,0.8)); } }
+
+    #hint {
+        font-size: 1rem;
+        color: #aaa;
+        margin-top: -15px;
+        animation: pulseText 2s infinite;
+    }
+    @keyframes pulseText { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+    /* Замок */
+    #lock-container {
+        position: relative;
+        width: 120px;
+        height: 150px;
+        cursor: pointer;
+        animation: breathe 2s infinite ease-in-out;
+    }
+    @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+
+    .lock-body {
+        position: absolute;
+        bottom: 0;
+        width: 100px;
+        height: 90px;
+        background: linear-gradient(135deg, #ffd700, #ff8c00);
+        left: 10px;
+        border-radius: 15px;
+        box-shadow: inset 0 0 10px rgba(255,255,255,0.5), 0 10px 20px rgba(0,0,0,0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 2;
+    }
+    .keyhole {
+        width: 20px;
+        height: 30px;
+        background: #2c3e50;
+        border-radius: 10px;
+        box-shadow: inset 0 0 5px #000;
+    }
+    .lock-shackle {
+        position: absolute;
+        top: 0;
+        left: 25px;
+        width: 70px;
+        height: 80px;
+        border: 15px solid #ffd700;
+        border-bottom: none;
+        border-radius: 40px 40px 0 0;
+        box-shadow: inset 0 5px 10px rgba(255,255,255,0.5), 0 -5px 10px rgba(0,0,0,0.3);
+        z-index: 1;
+        transform-origin: bottom left;
+    }
+
+    /* Анимация разрушения */
+    .break-anim .lock-shackle {
+        animation: breakShackle 0.6s forwards ease-out;
+    }
+    .break-anim .lock-body {
+        animation: shatter 0.6s forwards ease-out;
+    }
+    @keyframes breakShackle {
+        0% { transform: rotate(0deg); }
+        50% { transform: rotate(-30deg) translateY(-20px); opacity: 1; }
+        100% { transform: rotate(-60deg) translateY(-100px) translateX(-50px); opacity: 0; }
+    }
+    @keyframes shatter {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 50px #ff416c; }
+        100% { transform: scale(0); opacity: 0; }
+    }
+
+    /* Результат */
+    #result {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        max-width: 400px;
+        animation: fadeIn 1s forwards;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .photo-wrapper {
+        position: relative;
+        width: 100%;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 0 3px rgba(255,255,255,0.1);
+        transform: scale(0.8);
+        opacity: 0;
+        animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        animation-delay: 0.3s;
+    }
+    @keyframes popIn { to { transform: scale(1); opacity: 1; } }
+
+    .photo-wrapper img {
+        width: 100%;
+        display: block;
+        object-fit: cover;
+        aspect-ratio: 3/4;
+    }
+
+    .overlay-text {
+        position: absolute;
+        top: 0; left: 0; width: 100%;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+        padding: 20px;
+        font-size: 2rem;
+        font-weight: 700;
+        color: #fff;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+        text-align: center;
+        letter-spacing: 2px;
+    }
+</style>
+</head>
+<body>
+
+<div class="stars"></div>
+
+<div id="scene">
+    <div id="greeting">Ева, привет!</div>
+    <div id="hint">Нажми на замок 👇</div>
+    
+    <div id="lock-container" onclick="breakLock(this)">
+        <div class="lock-shackle"></div>
+        <div class="lock-body">
+            <div class="keyhole"></div>
+        </div>
+    </div>
+</div>
+
+<div id="result">
+    <div class="photo-wrapper">
+        <div class="overlay-text">Свінке</div>
+        <!-- Ваше фото -->
+        <img src="pic.png" alt="Фото" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'400\' viewBox=\'0 0 300 400\'%3E%3Crect width=\'300\' height=\'400\' fill=\'%23333\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' font-family=\'sans-serif\' font-size=\'18\' fill=\'%23888\' text-anchor=\'middle\'%3EПоложи фото pic.png в папку%3C/text%3E%3C/svg%3E'">
+    </div>
+</div>
+
+<script>
+    let audioCtx;
+    function playShatterSound() {
+        try {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const bufferSize = audioCtx.sampleRate * 0.5;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 2);
+            }
+            const source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'highpass';
+            filter.frequency.value = 1000;
+            const gain = audioCtx.createGain();
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            source.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+            source.start();
+        } catch (e) {
+            console.log("Аудио не поддерживается");
+        }
+    }
+
+    function breakLock(lockElement) {
+        // Защита от двойного клика
+        if (lockElement.classList.contains('break-anim')) return;
+        
+        // Включаем звук и вибрацию
+        playShatterSound();
+        if (navigator.vibrate) navigator.vibrate([50, 30, 100]);
+
+        // Запускаем анимацию разрушения
+        lockElement.classList.add('break-anim');
+
+        const scene = document.getElementById('scene');
+        const result = document.getElementById('result');
+
+        // Скрываем сцену и показываем фото
+        setTimeout(() => {
+            scene.style.opacity = '0';
+            setTimeout(() => {
+                scene.style.display = 'none';
+                result.style.display = 'flex';
+            }, 500); // Ждем окончания анимации затухания
+        }, 600); // Ждем окончания анимации поломки
+    }
+</script>
+
+</body>
+</html>
